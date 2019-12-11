@@ -1,0 +1,509 @@
+import random
+import copy
+import xml.dom.minidom
+import xml.etree.cElementTree as ET
+import re
+
+class Felhasznalo:
+    def __init__(self, kredit,szorzo, tulajdonsag, felh_valasz):
+        self.kredit = float(kredit)
+        self.szorzo = float(szorzo)
+        self.tulajdonsag = tulajdonsag
+        self.felh_valasz = felh_valasz
+        self.presztizsindex = float(kredit * szorzo)
+        self.szavazas = 0
+
+class Tulajdonsag:
+    def __init__(self, nev, hozzaertes,kockazatvallalas,gyakorisag):
+        self.nev = nev
+        self.hozzaertes = hozzaertes
+        self.kockazat = kockazatvallalas 
+        self.gyakorisag = gyakorisag
+
+class Hir:
+    def __init__(self,allapot,ellentet,ciklus):
+        self.allapot = allapot
+        self.ellentet = ellentet
+        self.ciklus = ciklus
+        self.biralatszam = 0
+
+
+def tulajdonsag(kicsi_gyak,kozepes_gyak,magas_gyak):
+    tul_lista = [Tulajdonsag(0,0,0,0)]*27
+    i = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    j = 0
+    while i < 9:
+        tul_lista[i] = Tulajdonsag("Kis tudású",0,0,0)
+        if i in (0,1,2):
+            tul_lista[i].nev += " - Kicsi kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]
+            tul_lista[i].gyakorisag = gyak_lista[a]
+            tul_lista[i].nev += gyak_lista_szoveg[a]
+            a += 1
+            i += 1
+        elif i in (3,4,5):
+            tul_lista[i].nev += " - Közepes kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]
+            tul_lista[i].gyakorisag = gyak_lista[b]
+            tul_lista[i].nev += gyak_lista_szoveg[b]
+            i += 1
+            b += 1
+        elif i in (6,7,8):
+            tul_lista[i].nev += " - Nagy kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]
+            tul_lista[i].gyakorisag = gyak_lista[c]
+            tul_lista[i].nev += gyak_lista_szoveg[c]
+            i += 1
+            c += 1
+    while 9 <= i < 18:
+        tul_lista[i] = Tulajdonsag("Közepes tudású",0,0,0)
+        if i in (9,10,11):
+            tul_lista[i].nev += " - Kicsi kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]            
+            tul_lista[i].gyakorisag = gyak_lista[d]
+            tul_lista[i].nev += gyak_lista_szoveg[d]
+            d += 1
+            i += 1
+        elif i in (12,13,14):
+            tul_lista[i].nev += " - Közepes kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]            
+            tul_lista[i].gyakorisag = gyak_lista[e]
+            tul_lista[i].nev += gyak_lista_szoveg[e]
+            i += 1
+            e += 1
+        elif i in (15,16,17):
+            tul_lista[i].nev += " - Nagy kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]            
+            tul_lista[i].gyakorisag = gyak_lista[f]
+            tul_lista[i].nev += gyak_lista_szoveg[f]
+            i += 1
+            f += 1
+    while 18 <= i < 27:
+        tul_lista[i] = Tulajdonsag("Nagy tudású",0,0,0)
+        if i in (18,19,20):
+            tul_lista[i].nev += " - Kicsi kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]            
+            tul_lista[i].gyakorisag = gyak_lista[g]
+            tul_lista[i].nev += gyak_lista_szoveg[g]
+            g += 1
+            i += 1
+        elif i in (21,22,23):
+            tul_lista[i].nev += " - Közepes kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]            
+            tul_lista[i].gyakorisag = gyak_lista[h]
+            tul_lista[i].nev += gyak_lista_szoveg[h]
+            i += 1
+            h += 1
+        elif i in (24,25,26):
+            tul_lista[i].nev += " - Nagy kockázat - "
+            gyak_lista = [kicsi_gyak,kozepes_gyak,magas_gyak]
+            gyak_lista_szoveg = ["{}%-os gyakoriság".format(kicsi_gyak),"{}%-os gyakoriság".format(kozepes_gyak), "{}%-os gyakoriság".format(magas_gyak)]            
+            tul_lista[i].gyakorisag = gyak_lista[j]
+            tul_lista[i].nev += gyak_lista_szoveg[j]
+            i += 1
+            j += 1
+    return tul_lista
+
+def tulajdonsag_adatok_kockazat(felh):
+    if "Kicsi kockázat" in felh.tulajdonsag.nev:
+        felh.tulajdonsag.kockazat = random.randint(10,35)
+        beadott_presztizs = felh.tulajdonsag.kockazat/100 * felh.presztizsindex
+    elif "Közepes kockázat" in felh.tulajdonsag.nev:
+        felh.tulajdonsag.kockazat = random.randint(35,65)
+        beadott_presztizs = felh.tulajdonsag.kockazat/100 * felh.presztizsindex
+    else:
+        felh.tulajdonsag.kockazat = random.randint(65,90)
+        beadott_presztizs = felh.tulajdonsag.kockazat/100 * felh.presztizsindex
+    return beadott_presztizs
+    
+def tulajdonsag_adatok_hozzaertes(felh,x):
+    allapot = ["Fake", "Genuine"]
+    ellentetes =["Genuine","Fake"]
+    if "Kis tudású" in felh.tulajdonsag.nev:
+        temp = random.choice([[allapot[ellentetes.index(x.ellentet)]] +[x.ellentet]*2, [allapot[ellentetes.index(x.ellentet)]] +[x.ellentet]*3, [allapot[ellentetes.index(x.ellentet)]] +[x.ellentet]*4])
+        if temp == ([allapot[ellentetes.index(x.ellentet)]] +[x.ellentet]*2):
+            felh.tulajdonsag.hozzaertes = 33
+        elif temp == ([allapot[ellentetes.index(x.ellentet)]] +[x.ellentet]*3):
+            felh.tulajdonsag.hozzaertes = 25
+        else:
+            felh.tulajdonsag.hozzaertes = 20
+        felh.felh_valasz = random.choice(temp)
+    elif "Közepes tudású" in felh.tulajdonsag.nev:
+        temp = [allapot[ellentetes.index(x.ellentet)]] +[x.ellentet]
+        felh.tulajdonsag.hozzaertes = 50
+        felh.felh_valasz = random.choice(temp)
+    elif "Nagy tudású" in felh.tulajdonsag.nev:
+        temp = random.choice([[allapot[ellentetes.index(x.ellentet)]]*2 +[x.ellentet], [allapot[ellentetes.index(x.ellentet)]]*3 +[x.ellentet], [allapot[ellentetes.index(x.ellentet)]]*4 +[x.ellentet]])
+        if temp == ([allapot[ellentetes.index(x.ellentet)]]*2 +[x.ellentet]):
+            felh.tulajdonsag.hozzaertes = 67
+        elif temp == ([allapot[ellentetes.index(x.ellentet)]]*3 +[x.ellentet]):
+            felh.tulajdonsag.hozzaertes = 75
+        else:
+            felh.tulajdonsag.hozzaertes = 80
+        felh.felh_valasz = random.choice(temp)
+
+def felhasznalogeneralas(db, lista_tul, kis_tudas_arany,kozepes_tudas_arany,nagy_tudas_arany):
+    felhlista = list()
+    kezdo_kredit = 10
+    kezdo_szorzo = 1.3
+    szavazas = []
+    i = 0
+    while i < len(lista_tul):
+        elem = lista_tul[i]
+        if i in (1,2,3,5,6,7):
+            szam = (kis_tudas_arany/100)/9
+        elif i in (0,8):
+            szam = ((kis_tudas_arany/100)/9)/2
+        elif i == 4:
+            szam = ((kis_tudas_arany/100)/9)*2
+        elif i in (10,11,12,14,15,16):
+            szam = (kozepes_tudas_arany/100)/9
+        elif i in (9,17):
+            szam = ((kozepes_tudas_arany/100)/9)/2
+        elif i == 13:
+            szam = ((kozepes_tudas_arany/100)/9)*2
+        elif i in (19,20,21,23,24,25):
+            szam = (nagy_tudas_arany/100)/9
+        elif i in (18,26):
+            szam = ((nagy_tudas_arany/100)/9)/2
+        elif i == 22:
+            szam = ((nagy_tudas_arany/100)/9)*2
+        for _ in range (int(db*szam)):
+            szavazas.append(elem)
+        i += 1
+    while len(szavazas) != db and len(szavazas) < db:
+        szavazas.append(lista_tul[13])
+    for _ in range(0,int(db)):
+        tulajdonsag = szavazas[0]
+        felh = Felhasznalo(kezdo_kredit, kezdo_szorzo, tulajdonsag,1)
+        szavazas.remove(tulajdonsag)
+        felhlista.append(felh)
+    return felhlista
+
+def felh_meghatarozas(felhlista,tudas,kockazat,gyakorisag):
+    x = 0
+    for felh in felhlista:
+        if tudas in felh.tulajdonsag.hozzaertes and kockazat in felh.tulajdonsag.kockazatvallalas and gyakorisag in felh.tulajdonsag.gyakorisag:
+            x += 1
+    return x
+
+
+def szorzomeghatarozas(proba_hirlista,lista_felh):
+    for x in proba_hirlista:
+        for y in lista_felh:
+            tulajdonsag_adatok_hozzaertes(y,x)
+            if y.felh_valasz == x.allapot:
+                y.szorzo += 0.5
+    return lista_felh
+
+def hirgeneralas(db):
+    hirlista = list()
+    allapot = ["Fake", "Genuine"]
+    ellentet =["Genuine","Fake"]
+    for _ in range (0, int(db)):
+        i = random.choice(allapot)
+        hir = Hir(i,ellentet[allapot.index(i)],1)
+        hirlista.append(hir)
+    return hirlista          
+
+def jutalmazas_buntetes_1(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista):
+    for felh in szavazott_felhasznalo:
+        if felh.felh_valasz == x.allapot:
+            if felh.szorzo < 15:
+                felh.szorzo += ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg))
+            else:
+                felh.szorzo += ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg))/100
+            felh.presztizsindex = felh.kredit * felh.szorzo
+        else:
+            felh.szorzo -= ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * 3
+            if felh.szorzo <= 1:
+                felh.szorzo = 1
+            felh.presztizsindex = felh.kredit * felh.szorzo
+    return szavazott_felhasznalo
+
+def jutalmazas_buntetes_2(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista):
+    for felh in szavazott_felhasznalo:
+        if felh.felh_valasz == x.allapot:
+            if felh.szorzo < 15:
+                felh.szorzo += ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * beadott_presztizs_lista[szavazott_felhasznalo.index(felh)]/felh.presztizsindex
+            else:
+                felh.szorzo += (((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * beadott_presztizs_lista[szavazott_felhasznalo.index(felh)]/felh.presztizsindex)/100
+            felh.presztizsindex = felh.kredit * felh.szorzo
+        else:
+            felh.szorzo -= ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * beadott_presztizs_lista[szavazott_felhasznalo.index(felh)]/felh.presztizsindex * 3
+            if felh.szorzo <= 1:
+                felh.szorzo = 1
+            felh.presztizsindex = felh.kredit * felh.szorzo
+    return szavazott_felhasznalo
+
+def jutalmazas_buntetes_3(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista):
+    for felh in szavazott_felhasznalo:
+        if felh.felh_valasz == x.allapot:
+            felh.szorzo += ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg))
+            felh.presztizsindex = felh.kredit * felh.szorzo
+        else:
+            felh.szorzo -= ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * 3
+            if felh.szorzo <= 1:
+                felh.szorzo = 1
+            felh.presztizsindex = felh.kredit * felh.szorzo
+    return szavazott_felhasznalo
+
+
+def jutalmazas_buntetes_4(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista):
+    for felh in szavazott_felhasznalo:
+        if felh.felh_valasz == x.allapot:
+            felh.szorzo += ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * beadott_presztizs_lista[szavazott_felhasznalo.index(felh)]/felh.presztizsindex
+            felh.presztizsindex = felh.kredit * felh.szorzo
+        else:
+            felh.szorzo -= ((nyertes_presztizsindex/beadott_presztizs_mennyiseg) - (vesztes_presztizsindex/beadott_presztizs_mennyiseg)) * beadott_presztizs_lista[szavazott_felhasznalo.index(felh)]/felh.presztizsindex * 3
+            if felh.szorzo <= 1:
+                felh.szorzo = 1
+            felh.presztizsindex = felh.kredit * felh.szorzo
+    return szavazott_felhasznalo
+
+
+def jutalmazas_buntetes_5(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista):
+    for felh in szavazott_felhasznalo:
+        if felh.felh_valasz == x.allapot:
+            felh.szorzo += 1/felh.szorzo
+            felh.presztizsindex = felh.kredit * felh.szorzo
+        else:
+            felh.szorzo = felh.szorzo * 0.5
+            if felh.szorzo <= 1:
+                felh.szorzo = 1
+            felh.presztizsindex = felh.kredit * felh.szorzo
+    return szavazott_felhasznalo
+
+def jutalmazas_buntetes_6(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista):
+    for felh in szavazott_felhasznalo:
+        if felh.felh_valasz == x.allapot:
+            felh.presztizsindex = felh.kredit * felh.szorzo
+            felh.presztizsindex += (vesztes_presztizsindex/valaszlista.count(x.allapot))
+            felh.szorzo = felh.presztizsindex/felh.kredit
+            felh.presztizsindex = felh.kredit * felh.szorzo
+        else:
+            felh.presztizsindex = felh.kredit * felh.szorzo
+            felh.presztizsindex -= beadott_presztizs_lista[szavazott_felhasznalo.index(felh)]
+            felh.szorzo = felh.presztizsindex/felh.kredit
+            if felh.szorzo <= 1:
+                felh.szorzo = 1
+            felh.presztizsindex = felh.kredit * felh.szorzo
+    return szavazott_felhasznalo
+
+def felhasznaloi_dontes(lista_felh,x,ciklus,fuggveny):
+    x.biralatszam = 0
+    osszesitett_Fake = 0
+    osszesitett_Genuine = 0
+    beadott_presztizs_lista = []
+    szavazott_felhasznalo =[]
+    valaszlista = []
+    beadott_presztizs_mennyiseg = 0
+    #amennyiben több ciklus kell ahhoz, hogy a hír elfogadásra kerüljön, minden ciklussal csökken az elfogadáshoz szükséges 
+    lista_szazalek = [1,0.8,0.77,0.74,0.71,0.68,0.65,0.62,0.59,0.56,0.53]
+    if ciklus < 11:
+        szazalek = lista_szazalek[ciklus]   
+    else:
+        szazalek = 0.51
+    for y in lista_felh:
+        if random.randint(0,100) >= y.tulajdonsag.gyakorisag:
+            y.szavazas = 0
+        else:
+            y.szavazas = 1
+            x.biralatszam +=1
+        if y.szavazas == 1:
+            beadott_presztizs = tulajdonsag_adatok_kockazat(y)
+            tulajdonsag_adatok_hozzaertes(y,x)
+            szavazott_felhasznalo.append(y)
+            beadott_presztizs_mennyiseg += beadott_presztizs
+            beadott_presztizs_lista.append(beadott_presztizs)
+            valaszlista.append(y.felh_valasz)
+            if y.felh_valasz == "Fake":
+                osszesitett_Fake += beadott_presztizs
+            else:
+                osszesitett_Genuine += beadott_presztizs
+    if osszesitett_Fake >= osszesitett_Genuine:
+        if osszesitett_Fake >= szazalek*beadott_presztizs_mennyiseg:
+            nyertes_presztizsindex = osszesitett_Fake
+            vesztes_presztizsindex = osszesitett_Genuine
+            x.allapot = "Fake"
+        else:
+            x.allapot = "Pending"
+    else:
+        if osszesitett_Genuine >= szazalek * beadott_presztizs_mennyiseg:
+            nyertes_presztizsindex = osszesitett_Genuine
+            vesztes_presztizsindex = osszesitett_Fake
+            x.allapot = "Genuine"
+        else:
+            x.allapot = "Pending"
+    if x.allapot != "Pending":
+        fuggveny(szavazott_felhasznalo,nyertes_presztizsindex,beadott_presztizs_mennyiseg,vesztes_presztizsindex,x,beadott_presztizs_lista,valaszlista)
+    else:
+        x.ciklus += 1
+        ciklus += 1
+        felhasznaloi_dontes(lista_felh,x,ciklus,fuggveny)
+    return lista_felh
+
+def fake_check(alap_lista,ujlista):
+    fake_check = 0
+    i = 0
+    while i < len(alap_lista):
+        if alap_lista[i].allapot == ujlista[i].allapot:
+            i += 1
+        else:
+            fake_check +=1
+            i += 1
+    arany = (fake_check / len(alap_lista))*100
+    return arany
+
+def szamitas(felh_szam, hir_szam, kicsigyak,kozepesgyak,nagygyak,kistudas,kozepestudas,nagytudas,root,ssz,fuggveny):
+    x = felh_szam
+    y = hir_szam
+    kicsi_gyak = kicsigyak
+    kozepes_gyak = kozepesgyak
+    magas_gyak = nagygyak
+    kis_tudas_arany = kistudas
+    kozepes_tudas_arany = kozepestudas
+    nagy_tudas_arany = nagytudas
+    atlag_tudas_teljes = (kis_tudas_arany * 26 +kozepes_tudas_arany * 50 + nagy_tudas_arany * 74)/100
+    atlag_gyakorisag = (kicsi_gyak + kozepes_gyak + magas_gyak)/3
+    lista_tul = tulajdonsag(kicsi_gyak,kozepes_gyak,magas_gyak)
+    lista_felh = felhasznalogeneralas(x,lista_tul, kis_tudas_arany, kozepes_tudas_arany, nagy_tudas_arany)
+    proba_hirlista = hirgeneralas(10)
+    szorzomeghatarozas(proba_hirlista,lista_felh)
+    lista_hir = hirgeneralas(y)
+    alap_hir_lista = copy.deepcopy(lista_hir)
+    biralat_lista = []
+    ciklus_lista = []
+    meres = ET.SubElement(root, "Measure")
+    adat = ET.SubElement(meres, "Data")
+    ET.SubElement(adat,"Legend").text = "{:5.4}%_AvKnow,{:5.4}%_AvFreq,Func:{},Ssz{}".format(atlag_tudas_teljes,atlag_gyakorisag,fuggveny.__name__[-1],ssz)
+    input_data = ET.SubElement(meres,"Input")
+    ET.SubElement(input_data,"Input_function").text = "szamitas({},{},{},{},{},{},{},{},root,{},{}".format(x,y,kicsi_gyak,kozepes_gyak,magas_gyak,kis_tudas_arany,kozepes_tudas_arany,nagy_tudas_arany,ssz,fuggveny.__name__)
+    ET.SubElement(input_data,"Number_of_users").text = "{}".format(x)
+    ET.SubElement(input_data,"Number_of_news").text = "{}".format(y)
+    ET.SubElement(input_data,"Voting_frequency_min").text = "{}".format(kicsi_gyak)
+    ET.SubElement(input_data,"Voting_frequency_mid").text = "{}".format(kozepes_gyak)
+    ET.SubElement(input_data,"Voting_frequency_max").text = "{}".format(magas_gyak)
+    ET.SubElement(input_data,"Rate_of_users_with_low_knowledge").text = "{}".format(kis_tudas_arany)
+    ET.SubElement(input_data,"Rate_of_users_with_medium_knowledge").text = "{}".format(kozepes_tudas_arany)
+    ET.SubElement(input_data,"Rate_of_users_with_high_knowledge").text = "{}".format(nagy_tudas_arany)
+    ET.SubElement(input_data,"Function_of_recompensation").text = "{}".format(fuggveny.__name__)
+    ET.SubElement(input_data,"Seq_number").text = "{}".format(ssz)
+    for x in lista_hir:
+        lista_felh = felhasznaloi_dontes(lista_felh,x,1,fuggveny)
+        maximum = 0
+        minimum = 500000
+        for elem in lista_felh:
+            if elem.presztizsindex > maximum:
+                maximum = int(elem.presztizsindex)
+            if elem.presztizsindex < minimum:
+                minimum = int(elem.presztizsindex)
+        biralat_lista.append(x.biralatszam)
+        ciklus_lista.append(x.ciklus)
+        if (lista_hir.index(x)+1) % 100 == 0 or lista_hir.index(x) == 0:
+            hir = ET.SubElement(meres, "News")
+            ET.SubElement(hir, "Number").text = "{}".format(lista_hir.index(x))
+            ET.SubElement(hir, "Original_state").text = "{}".format(alap_hir_lista[lista_hir.index(x)].allapot)
+            ET.SubElement(hir, "Status_after_voting").text = "{}".format(x.allapot)
+            ET.SubElement(hir, "Continous_average_amount_of_voters").text = "{}".format(sum(biralat_lista)/len(biralat_lista))
+            ET.SubElement(hir, "Continous_average_amount_of_cycles").text = "{}".format(sum(ciklus_lista)/len(ciklus_lista))
+            ET.SubElement(hir, "Continous_rate_of_wrong_evaluations").text = "{}".format(fake_check(alap_hir_lista,lista_hir))
+            ET.SubElement(hir, "maximum_PI").text = "{}".format(maximum)
+            ET.SubElement(hir, "minimum_PI").text = "{}".format(minimum)
+            ET.SubElement(hir, "PI_difference").text = "{}".format(maximum-minimum)
+    
+    ET.SubElement(meres, "Rate_of_wrong_evaluations").text = "{}".format(fake_check(alap_hir_lista,lista_hir))
+    ET.SubElement(meres, "Average_amount_of_voters").text = "{}".format(sum(biralat_lista)/len(biralat_lista))
+    ET.SubElement(meres, "Average_amount_of_cycles").text = "{}".format(sum(ciklus_lista)/len(ciklus_lista))
+    return meres
+
+def main():
+
+    x = 1000 #felhasznalok szama
+    y = 5000 #hírek szama  
+
+    root = ET.Element("root")
+
+    #azonos alacsony gyakoriság, de változó tudás
+    szamitas(x,y,3.3,5.0,6.7,33,34,33,root,1,jutalmazas_buntetes_1)   
+    szamitas(x,y,3.3,5.0,6.7,33,34,33,root,2,jutalmazas_buntetes_2)
+    szamitas(x,y,3.3,5.0,6.7,33,34,33,root,3,jutalmazas_buntetes_3)
+    szamitas(x,y,3.3,5.0,6.7,33,34,33,root,4,jutalmazas_buntetes_4)
+    szamitas(x,y,3.3,5.0,6.7,33,34,33,root,5,jutalmazas_buntetes_5)
+    szamitas(x,y,3.3,5.0,6.7,33,34,33,root,6,jutalmazas_buntetes_6)
+    szamitas(x,y,3.3,5.0,6.7,67,20,13,root,7,jutalmazas_buntetes_1)   
+    szamitas(x,y,3.3,5.0,6.7,67,20,13,root,8,jutalmazas_buntetes_2)
+    szamitas(x,y,3.3,5.0,6.7,67,20,13,root,9,jutalmazas_buntetes_3)
+    szamitas(x,y,3.3,5.0,6.7,67,20,13,root,10,jutalmazas_buntetes_4)
+    szamitas(x,y,3.3,5.0,6.7,67,20,13,root,11,jutalmazas_buntetes_5)
+    szamitas(x,y,3.3,5.0,6.7,67,20,13,root,12,jutalmazas_buntetes_6)
+    szamitas(x,y,3.3,5.0,6.7,13,20,67,root,13,jutalmazas_buntetes_1)   
+    szamitas(x,y,3.3,5.0,6.7,13,20,67,root,14,jutalmazas_buntetes_2)
+    szamitas(x,y,3.3,5.0,6.7,13,20,67,root,15,jutalmazas_buntetes_3)
+    szamitas(x,y,3.3,5.0,6.7,13,20,67,root,16,jutalmazas_buntetes_4)
+    szamitas(x,y,3.3,5.0,6.7,13,20,67,root,17,jutalmazas_buntetes_5)
+    szamitas(x,y,3.3,5.0,6.7,13,20,67,root,18,jutalmazas_buntetes_6)
+
+    #közepes gyakoriság, változó tudás
+    szamitas(x,y,5,10,15,33,34,33,root,19,jutalmazas_buntetes_1)   
+    szamitas(x,y,5,10,15,33,34,33,root,20,jutalmazas_buntetes_2)
+    szamitas(x,y,5,10,15,33,34,33,root,21,jutalmazas_buntetes_3)
+    szamitas(x,y,5,10,15,33,34,33,root,22,jutalmazas_buntetes_4)
+    szamitas(x,y,5,10,15,33,34,33,root,23,jutalmazas_buntetes_5)
+    szamitas(x,y,5,10,15,33,34,33,root,24,jutalmazas_buntetes_6)
+    szamitas(x,y,5,10,15,67,20,13,root,25,jutalmazas_buntetes_1)   
+    szamitas(x,y,5,10,15,67,20,13,root,26,jutalmazas_buntetes_2)
+    szamitas(x,y,5,10,15,67,20,13,root,27,jutalmazas_buntetes_3)
+    szamitas(x,y,5,10,15,67,20,13,root,28,jutalmazas_buntetes_4)
+    szamitas(x,y,5,10,15,67,20,13,root,29,jutalmazas_buntetes_5)
+    szamitas(x,y,5,10,15,67,20,13,root,30,jutalmazas_buntetes_6)
+    szamitas(x,y,5,10,15,13,20,67,root,31,jutalmazas_buntetes_1)   
+    szamitas(x,y,5,10,15,13,20,67,root,32,jutalmazas_buntetes_2)
+    szamitas(x,y,5,10,15,13,20,67,root,33,jutalmazas_buntetes_3)
+    szamitas(x,y,5,10,15,13,20,67,root,34,jutalmazas_buntetes_4)
+    szamitas(x,y,5,10,15,13,20,67,root,35,jutalmazas_buntetes_5)
+    szamitas(x,y,5,10,15,13,20,67,root,36,jutalmazas_buntetes_6)
+
+    #magas gyakoriság, változó tudás
+    szamitas(x,y,20,30,40,33,34,33,root,37,jutalmazas_buntetes_1)   
+    szamitas(x,y,20,30,40,33,34,33,root,38,jutalmazas_buntetes_2)
+    szamitas(x,y,20,30,40,33,34,33,root,39,jutalmazas_buntetes_3)
+    szamitas(x,y,20,30,40,33,34,33,root,40,jutalmazas_buntetes_4)
+    szamitas(x,y,20,30,40,33,34,33,root,41,jutalmazas_buntetes_5)
+    szamitas(x,y,20,30,40,33,34,33,root,42,jutalmazas_buntetes_6)
+    szamitas(x,y,20,30,40,67,20,13,root,43,jutalmazas_buntetes_1)   
+    szamitas(x,y,20,30,40,67,20,13,root,44,jutalmazas_buntetes_2)
+    szamitas(x,y,20,30,40,67,20,13,root,45,jutalmazas_buntetes_3)
+    szamitas(x,y,20,30,40,67,20,13,root,46,jutalmazas_buntetes_4)
+    szamitas(x,y,20,30,40,67,20,13,root,47,jutalmazas_buntetes_5)
+    szamitas(x,y,20,30,40,67,20,13,root,48,jutalmazas_buntetes_6)
+    szamitas(x,y,20,30,40,13,20,67,root,49,jutalmazas_buntetes_1)   
+    szamitas(x,y,20,30,40,13,20,67,root,50,jutalmazas_buntetes_2)
+    szamitas(x,y,20,30,40,13,20,67,root,51,jutalmazas_buntetes_3)
+    szamitas(x,y,20,30,40,13,20,67,root,52,jutalmazas_buntetes_4)
+    szamitas(x,y,20,30,40,13,20,67,root,53,jutalmazas_buntetes_5)
+    szamitas(x,y,20,30,40,13,20,67,root,54,jutalmazas_buntetes_6)
+     
+    xml_string = ET.tostring(root,encoding="utf-8",method="xml")
+    dom = xml.dom.minidom.parseString(xml_string)
+    pretty_xml_as_string = dom.toprettyxml()
+    with open("Results_54_measures.xml","w+",encoding="utf-8") as f:
+        f.write(pretty_xml_as_string)
+
+main()
